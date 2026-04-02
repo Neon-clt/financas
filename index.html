@@ -3,223 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Orçamento Pessoal</title>
+    <title>NeoFNC • Controle Financeiro Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f7f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .login-screen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .login-box {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 320px;
-            width: 90%;
-        }
-        .login-box h2 {
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover { background: #2980b9; }
-        .error { color: #e74c3c; margin-top: 10px; }
-
-        /* Estilos do orçamento (mesmo de antes) */
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; }
-        .resumo { display: flex; justify-content: space-around; margin: 20px 0; flex-wrap: wrap; }
-        .card { background: #fff; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); text-align: center; min-width: 200px; margin: 10px; }
-        .receita { border-left: 6px solid #27ae60; }
-        .despesa { border-left: 6px solid #e74c3c; }
-        .saldo { border-left: 6px solid #3498db; font-size: 1.3em; }
-        form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin: 20px 0; }
-        input, select, button { padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; }
-        .positivo { color: #27ae60; }
-        .negativo { color: #e74c3c; }
-        .delete-btn { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .glass { background: rgba(255,255,255,0.09); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.15); }
+        .chat-bubble { max-width: 85%; padding: 14px 18px; border-radius: 20px; margin-bottom: 12px; }
+        .user { background: #00d4ff; color: #111; align-self: flex-end; }
+        .grok { background: #18181b; align-self: flex-start; }
     </style>
 </head>
-<body>
+<body class="bg-zinc-950 text-white min-h-screen">
 
-    <!-- Tela de Login -->
-    <div id="login-screen" class="login-screen">
-        <div class="login-box">
-            <h2>🔐 Acesso Protegido</h2>
-            <p>Digite a senha para acessar seu orçamento</p>
-            <input type="password" id="senha" placeholder="Senha" autocomplete="off">
-            <button onclick="verificarSenha()">Entrar</button>
-            <div id="erro" class="error"></div>
+<div id="login-screen" class="fixed inset-0 bg-zinc-950 flex items-center justify-center z-50">
+    <div class="glass rounded-3xl p-12 max-w-md w-full mx-4 text-center">
+        <div class="mx-auto w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl flex items-center justify-center text-5xl mb-6">💎</div>
+        <h1 class="text-5xl font-bold tracking-[-2px]">NeoFNC</h1>
+        <p class="text-zinc-400 text-xl mt-1">Controle Financeiro Inteligente 2026</p>
+        <input id="senha" type="password" placeholder="Senha" class="mt-10 w-full bg-white/10 border border-white/20 rounded-3xl px-6 py-5 text-lg focus:border-cyan-400 outline-none">
+        <button onclick="verificarSenha()" class="mt-8 w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-zinc-950 font-semibold py-5 rounded-3xl text-lg">Entrar</button>
+        <div id="login-erro" class="mt-4 text-red-400 text-sm"></div>
+        <p class="text-xs text-zinc-500 mt-10">Senha: <span class="font-mono">Vlg2023@</span></p>
+    </div>
+</div>
+
+<div id="main-app" class="hidden min-h-screen flex">
+
+    <!-- SIDEBAR -->
+    <div class="w-72 bg-zinc-900 border-r border-white/10 flex flex-col">
+        <div class="p-8 flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl flex items-center justify-center text-3xl">💰</div>
+            <h1 class="text-3xl font-bold tracking-[-1px]">NeoFNC</h1>
         </div>
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <a onclick="navigate(0)" id="nav-0" class="nav flex items-center gap-4 px-6 py-4 rounded-3xl nav-active"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+            <a onclick="navigate(1)" id="nav-1" class="nav flex items-center gap-4 px-6 py-4 rounded-3xl"><i class="fa-solid fa-list-ul"></i> Transações</a>
+            <a onclick="navigate(2)" id="nav-2" class="nav flex items-center gap-4 px-6 py-4 rounded-3xl"><i class="fa-solid fa-bank"></i> Bancos</a>
+            <a onclick="navigate(9)" id="nav-9" class="nav flex items-center gap-4 px-6 py-4 rounded-3xl"><i class="fa-solid fa-brain"></i> Grok IA</a>
+        </nav>
     </div>
 
-    <!-- Conteúdo principal (escondido até login) -->
-    <div id="main-content" class="container">
-        <h1>💰 Meu Orçamento Pessoal</h1>
-
-        <div class="resumo">
-            <div class="card receita"><h3>Receitas</h3><h2 id="total-receitas">R$ 0,00</h2></div>
-            <div class="card despesa"><h3>Despesas</h3><h2 id="total-despesas">R$ 0,00</h2></div>
-            <div class="card saldo"><h3>Saldo Atual</h3><h2 id="saldo-total">R$ 0,00</h2></div>
+    <!-- CONTEÚDO -->
+    <div class="flex-1 flex flex-col">
+        <div class="h-16 border-b border-white/10 px-8 flex items-center justify-between bg-white/5">
+            <h2 id="page-title" class="text-3xl font-semibold">Dashboard</h2>
         </div>
 
-        <form id="form-transacao">
-            <input type="text" id="descricao" placeholder="Descrição (ex: Salário, Aluguel)" required>
-            <input type="number" id="valor" placeholder="Valor" step="0.01" required>
-            <select id="tipo">
-                <option value="receita">Receita (+)</option>
-                <option value="despesa">Despesa (-)</option>
-            </select>
-            <button type="submit">Adicionar</button>
-        </form>
+        <!-- DASHBOARD -->
+        <div id="screen-0" class="flex-1 p-8 overflow-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass rounded-3xl p-6"><div class="text-emerald-400">Receitas</div><div id="dash-receitas" class="text-5xl font-semibold mt-3">R$ 0</div></div>
+                <div class="glass rounded-3xl p-6"><div class="text-rose-400">Despesas</div><div id="dash-despesas" class="text-5xl font-semibold mt-3">R$ 0</div></div>
+                <div class="glass rounded-3xl p-6"><div class="text-cyan-400">Saldo</div><div id="dash-saldo" class="text-5xl font-semibold mt-3">R$ 0</div></div>
+                <div class="glass rounded-3xl p-6"><div class="text-violet-400">Crypto</div><div id="dash-crypto" class="text-5xl font-semibold mt-3">R$ 0</div></div>
+            </div>
+        </div>
 
-        <table id="tabela">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Descrição</th>
-                    <th>Tipo</th>
-                    <th>Valor</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <!-- BANCOS SIMULADOS -->
+        <div id="screen-2" class="flex-1 p-8 hidden overflow-auto">
+            <h3 class="text-3xl font-semibold mb-6">Integração com Bancos (Simulada)</h3>
+            <div class="glass rounded-3xl p-8 space-y-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-medium">Nubank</h4>
+                        <p class="text-4xl font-semibold" id="nubank-saldo">R$ 8.742,50</p>
+                    </div>
+                    <button onclick="importarBanco('Nubank')" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-3xl font-medium">Importar Extrato</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-medium">Itaú</h4>
+                        <p class="text-4xl font-semibold" id="itau-saldo">R$ 3.210,00</p>
+                    </div>
+                    <button onclick="importarBanco('Itaú')" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-3xl font-medium">Importar Extrato</button>
+                </div>
+            </div>
+        </div>
 
-        <p style="text-align:center; margin-top:20px; color:#777;">
-            Dados salvos automaticamente no navegador.<br>
-            Senha: <strong>Vlg2023@</strong>
-        </p>
+        <!-- GROK IA -->
+        <div id="screen-9" class="flex-1 p-8 hidden flex flex-col">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fa-solid fa-brain text-3xl text-violet-400"></i>
+                <h3 class="text-3xl font-semibold">Grok IA Financeira</h3>
+            </div>
+            <div id="chat" class="flex-1 glass rounded-3xl p-6 overflow-auto flex flex-col gap-4 mb-6"></div>
+            <div class="flex gap-3">
+                <input id="ia-prompt" type="text" placeholder="Ex: Qual foi meu maior gasto este mês? Dê dicas para economizar..." 
+                       class="flex-1 bg-white/10 border border-white/20 rounded-3xl px-6 py-4 outline-none">
+                <button onclick="sendToGrok()" class="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-10 rounded-3xl font-medium">Enviar</button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        const SENHA_CORRETA = "Vlg2023@";
-        let transacoes = JSON.parse(localStorage.getItem('transacoes')) || [];
+<script>
+// ====================== BACKEND SEGURO ======================
+const BACKEND_URL = "https://neofnc-grok-proxy.bernardesg723.workers.dev";
 
-        function verificarSenha() {
-            const senhaDigitada = document.getElementById('senha').value;
-            const erroEl = document.getElementById('erro');
+// ====================== DADOS ======================
+let transacoes = JSON.parse(localStorage.getItem('neofnc_transacoes')) || [];
 
-            if (senhaDigitada === SENHA_CORRETA) {
-                sessionStorage.setItem('logado', 'true');
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                initApp();
-            } else {
-                erroEl.textContent = "Senha incorreta! Tente novamente.";
-                document.getElementById('senha').value = '';
-            }
-        }
+// ====================== LOGIN ======================
+function verificarSenha() {
+    if (document.getElementById('senha').value === "Vlg2023@") {
+        sessionStorage.setItem('logado', 'true');
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        initApp();
+    } else {
+        document.getElementById('login-erro').innerHTML = "Senha incorreta";
+    }
+}
 
-        // Verifica se já está logado
-        if (sessionStorage.getItem('logado') === 'true') {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-        }
+// ====================== GROK IA (segura via backend) ======================
+async function sendToGrok() {
+    const input = document.getElementById('ia-prompt');
+    const question = input.value.trim();
+    if (!question) return;
 
-        function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
-        }
+    addMessage(question, true);
+    input.value = "";
 
-        function atualizarResumo() {
-            let receitas = 0, despesas = 0;
-            transacoes.forEach(t => t.tipo === 'receita' ? receitas += t.valor : despesas += t.valor);
-            const saldo = receitas - despesas;
+    const thinkingId = addMessage("Grok está analisando seus dados financeiros...", false);
 
-            document.getElementById('total-receitas').textContent = formatarMoeda(receitas);
-            document.getElementById('total-despesas').textContent = formatarMoeda(despesas);
-            const saldoEl = document.getElementById('saldo-total');
-            saldoEl.textContent = formatarMoeda(saldo);
-            saldoEl.style.color = saldo >= 0 ? '#27ae60' : '#e74c3c';
-        }
+    try {
+        const res = await fetch(BACKEND_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: [{ role: "user", content: question }]
+            })
+        });
 
-        function renderizarTabela() {
-            const tbody = document.querySelector('#tabela tbody');
-            tbody.innerHTML = '';
+        const data = await res.json();
+        document.getElementById(thinkingId).remove();
+        addMessage(data.choices[0].message.content.replace(/\n/g, '<br>'), false);
 
-            transacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+    } catch (e) {
+        document.getElementById(thinkingId).remove();
+        addMessage("Erro ao conectar com Grok. Verifique sua conexão.", false);
+    }
+}
 
-            transacoes.forEach((transacao, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${new Date(transacao.data).toLocaleDateString('pt-BR')}</td>
-                    <td>${transacao.descricao}</td>
-                    <td>${transacao.tipo === 'receita' ? '✅ Receita' : '❌ Despesa'}</td>
-                    <td class="${transacao.tipo === 'receita' ? 'positivo' : 'negativo'}">
-                        ${transacao.tipo === 'receita' ? '+' : '-'}${formatarMoeda(transacao.valor)}
-                    </td>
-                    <td><button class="delete-btn" data-index="${index}">Excluir</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
+function addMessage(text, isUser) {
+    const chat = document.getElementById('chat');
+    const div = document.createElement('div');
+    div.className = `chat-bubble flex ${isUser ? 'user justify-end' : 'grok'}`;
+    div.innerHTML = `<div>${text}</div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
 
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const index = parseInt(btn.getAttribute('data-index'));
-                    transacoes.splice(index, 1);
-                    salvarEAtualizar();
-                });
-            });
-        }
+// ====================== BANCOS SIMULADOS ======================
+function importarBanco(banco) {
+    alert(`✅ Extrato do ${banco} importado com sucesso!`);
+    transacoes.unshift(
+        {descricao: `Salário ${banco}`, valor: 5200, tipo: "receita", data: "2026-04-01"},
+        {descricao: `Compra via ${banco}`, valor: 127.50, tipo: "despesa", data: "2026-04-02"}
+    );
+    localStorage.setItem('neofnc_transacoes', JSON.stringify(transacoes));
+    calcularDashboard();
+}
 
-        function salvarEAtualizar() {
-            localStorage.setItem('transacoes', JSON.stringify(transacoes));
-            atualizarResumo();
-            renderizarTabela();
-        }
+// ====================== NAVEGAÇÃO ======================
+function navigate(n) {
+    document.querySelectorAll('[id^="screen-"]').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`screen-${n}`).classList.remove('hidden');
+    document.getElementById('page-title').textContent = n === 9 ? "Grok IA Financeira" : n === 2 ? "Integração com Bancos" : "Dashboard";
+}
 
-        function initApp() {
-            document.getElementById('form-transacao').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const descricao = document.getElementById('descricao').value.trim();
-                const valor = parseFloat(document.getElementById('valor').value);
-                const tipo = document.getElementById('tipo').value;
+function calcularDashboard() {
+    let r = 0, d = 0;
+    transacoes.forEach(t => t.tipo === "receita" ? r += t.valor : d += t.valor);
+    document.getElementById("dash-receitas").textContent = `R$ ${r.toLocaleString("pt-BR")}`;
+    document.getElementById("dash-despesas").textContent = `R$ ${d.toLocaleString("pt-BR")}`;
+    document.getElementById("dash-saldo").textContent = `R$ ${(r-d).toLocaleString("pt-BR")}`;
+}
 
-                if (!descricao || valor <= 0) {
-                    alert("Preencha todos os campos corretamente!");
-                    return;
-                }
+// ====================== INICIALIZAÇÃO ======================
+function initApp() {
+    if (transacoes.length === 0) {
+        transacoes = [
+            {descricao: "Salário", valor: 8500, tipo: "receita", data: "2026-04-01"},
+            {descricao: "Aluguel", valor: 1850, tipo: "despesa", data: "2026-04-03"}
+        ];
+        localStorage.setItem('neofnc_transacoes', JSON.stringify(transacoes));
+    }
+    calcularDashboard();
+    navigate(9); // Abre direto na IA
+}
 
-                transacoes.push({ descricao, valor, tipo, data: new Date().toISOString() });
-                this.reset();
-                salvarEAtualizar();
-            });
-
-            atualizarResumo();
-            renderizarTabela();
-        }
-    </script>
+window.onload = () => {
+    if (sessionStorage.getItem('logado') === 'true') {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        initApp();
+    }
+};
+</script>
 </body>
 </html>
